@@ -33,6 +33,7 @@ def filter_files_on_name_contains_any_from_block_list(files: list, block_list):
     return [_file for _file in files if not any([blocked_word in _file.name for blocked_word in block_list])]
 
 def get_relocationpath_for_file(file_metadata, to_path_prefix='/DefragBox'):
+
     year = str(file_metadata.client_modified.year)
     month = '0' + str(file_metadata.client_modified.month) if \
         len(str(file_metadata.client_modified.month)) == 1 else str(file_metadata.client_modified.month)
@@ -54,7 +55,8 @@ if __name__ == '__main__':
     print(dt.now(), 'Filtering files on block list words:', BLOCK_LIST)
     image_files = filter_files_on_name_contains_any_from_block_list(image_files, BLOCK_LIST)
     print(dt.now(), 'Remaining files:', len(image_files))
-    relocation_paths = [get_relocationpath_for_file(img_file) for img_file in image_files]
+    relocation_paths = [get_relocationpath_for_file(img_file) for \
+        img_file in image_files if type(img_file) == dropbox.files.FileMetadata]
     sample = relocation_paths[0] if len(relocation_paths) > 0 else None
     print(dt.now(), 'Batch copying the files to sorted folders. 1st sample:', sample)
     dbx.files_copy_batch_v2(relocation_paths)
