@@ -21,13 +21,9 @@ def init_dropbox(dropbox_token: str):
 def load_all_files(dbx: dropbox.Dropbox):
     response = dbx.files_list_folder("", recursive=True)
     entries = response.entries
-    i = 0
     while response.has_more:
-        i += 1
         response = dbx.files_list_folder_continue(response.cursor)
         entries += response.entries
-        if i == 10:
-            break
     return entries
 
 def filter_files_on_name_ending(files: list, name_endings: list):
