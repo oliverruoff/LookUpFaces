@@ -59,7 +59,7 @@ if __name__ == '__main__':
         img_file in image_files if type(img_file) == dropbox.files.FileMetadata]
     sample = relocation_paths[0] if len(relocation_paths) > 0 else None
     print(dt.now(), 'Batch copying the files to sorted folders. 1st sample:', sample)
-    dbx.files_copy_batch_v2(relocation_paths)
+    dbx.files_copy_batch(relocation_paths)
     print(dt.now(), 'Done!')
 
 
