@@ -23,6 +23,7 @@ def load_all_files(dbx: dropbox.Dropbox):
     response = dbx.files_list_folder("", recursive=True)
     entries = response.entries
     while response.has_more:
+        print(dt.now(), 'Listing files... Found so far:', len(entries))
         response = dbx.files_list_folder_continue(response.cursor)
         entries += response.entries
     return entries
