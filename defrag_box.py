@@ -49,7 +49,7 @@ def get_relocationpath_for_file(file_metadata, to_path_prefix='/DefragBox'):
 
 
 def batch_copy_chunks(dropbox_client: dropbox.Dropbox, relocation_paths: list, chunk_size: int = 1000):
-    for i in range(len(relocation_paths), chunk_size):
+    for i in range(0, len(relocation_paths), chunk_size):
         if i > len(relocation_paths)-chunk_size:
             print('Copying chunk:', i, '-', len(relocation_paths))
             dropbox_client.files_copy_batch_v2(relocation_paths[i:])
