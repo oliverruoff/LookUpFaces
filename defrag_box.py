@@ -48,6 +48,17 @@ def get_relocationpath_for_file(file_metadata, to_path_prefix='/DefragBox'):
     return dropbox.files.RelocationPath(from_path=file_metadata.path_lower, to_path=_to_path)
 
 
+def batch_copy_chunks(dropbox_client: dropbox.Dropbox, relocation_paths: list, chunk_size: int = 1000):
+    for i in range(len(relocation_paths), chunk_size):
+        if i > len(relocation_paths)-chunk_size:
+            print('Copying chunk:', i, '-', len(relocation_paths))
+            dropbox_client.files_copy_batch_v2(relocation_paths[i:])
+        else:
+            print('Copying chunk:', i, '-', i+chunk_size)
+            dropbox_client.files_copy_batch_v2(
+                relocation_paths[i:i+chunk_size])
+
+
 if __name__ == '__main__':
     dbx = init_dropbox(os.getenv('DROPBOX_TOKEN'))
     print(dt.now(), 'Loading all files. This will take a while (Depending on the amount of files in your dropbox).')
@@ -65,6 +76,6 @@ if __name__ == '__main__':
     relocation_paths = [get_relocationpath_for_file(img_file) for
                         img_file in image_files if type(img_file) == dropbox.files.FileMetadata]
     sample = relocation_paths[0] if len(relocation_paths) > 0 else None
-    print(dt.now(), 'Batch copying the files to sorted folders. 1st sample:', sample)
-    dbx.files_copy_batch(relocation_paths)
+    print(dt.now(), 'Batch copying the files to sorted folders. 1st relocation path sample:', sample)
+    batch_copy_chunks(dbx, relocation_paths, 1000)
     print(dt.now(), 'Done!')
