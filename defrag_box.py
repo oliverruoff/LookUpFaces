@@ -77,5 +77,14 @@ if __name__ == '__main__':
                         img_file in image_files if type(img_file) == dropbox.files.FileMetadata]
     sample = relocation_paths[0] if len(relocation_paths) > 0 else None
     print(dt.now(), 'Batch copying the files to sorted folders. 1st relocation path sample:', sample)
-    batch_copy_chunks(dbx, relocation_paths, 1000)
+    upload_progress = 0
+    for relocation_path in relocation_paths:
+        upload_progress += 1
+        print(dt.now(), 'Uploading:', relocation_path,
+              '(', upload_progress, '/', len(relocation_paths), ')')
+        try:
+            dbx.files_copy_v2(relocation_path.from_path,
+                              relocation_path.to_path)
+        except dropbox.exceptions.ApiError:
+            print(dt.now(), 'Error while copying file. Continuing...')
     print(dt.now(), 'Done!')
