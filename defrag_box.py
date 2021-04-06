@@ -15,13 +15,15 @@ FILE_NAME_ENDINGS_TO_FILTER_ON = ['jpg', 'jpeg', 'png', 'mp4', 'avi']
 BLOCK_LIST = ['WA']
 # List of folders where files will not be listed
 LOOKUP_FOLDER_LIST = ['/Smartphone Sync']
+# Path where files will be copied
+RELOCATION_PATH = '/DefragBox'
 
 
 def init_dropbox(dropbox_token: str):
     return dropbox.Dropbox(dropbox_token)
 
 
-def load_all_files(dbx: dropbox.Dropbox, lookup_folder: list = LOOKUP_FOLDER_LIST):
+def list_files(dbx: dropbox.Dropbox, lookup_folder: list):
     all_folder_entries = []
     for folder in lookup_folder:
         response = dbx.files_list_folder(folder, recursive=True)
@@ -42,7 +44,7 @@ def filter_files_on_name_contains_any_from_block_list(files: list, block_list):
     return [_file for _file in files if not any([blocked_word in _file.name for blocked_word in block_list])]
 
 
-def get_relocationpath_for_file(file_metadata, to_path_prefix='/DefragBox'):
+def get_relocationpath_for_file(file_metadata, to_path_prefix=RELOCATION_PATH):
 
     year = str(file_metadata.client_modified.year)
     month = '0' + str(file_metadata.client_modified.month) if \
@@ -68,8 +70,15 @@ def batch_copy_chunks(dropbox_client: dropbox.Dropbox, relocation_paths: list, c
 if __name__ == '__main__':
     dbx = init_dropbox(os.getenv('DROPBOX_TOKEN'))
     print(dt.now(), 'Loading all files. This will take a while (Depending on the amount of files in your dropbox).')
-    unfiltered_files = load_all_files(dbx)
+    unfiltered_files = list_files(dbx, LOOKUP_FOLDER_LIST)
     print(dt.now(), 'Found', len(unfiltered_files), 'files.')
+    already_copied_file_names = [f.name.split(
+        '__')[1] for f in list_files(dbx, [RELOCATION_PATH]) if '__' in f.name]
+    print(dt.now(), 'Found', len(already_copied_file_names),
+          'files, that were already copied.')
+    prefiltered_files = [
+        f for f in unfiltered_files if f.name not in (already_copied_file_names)]
+    print(dt.now(), 'List now contains', len(prefiltered_files), 'files.')
     name_endings = FILE_NAME_ENDINGS_TO_FILTER_ON + \
         [ending.upper() for ending in FILE_NAME_ENDINGS_TO_FILTER_ON]
     print(dt.now(), 'Filtering files on endings:', name_endings)
