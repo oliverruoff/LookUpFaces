@@ -13,20 +13,25 @@ load_dotenv()
 
 FILE_NAME_ENDINGS_TO_FILTER_ON = ['jpg', 'jpeg', 'png', 'mp4', 'avi']
 BLOCK_LIST = ['WA']
+# List of folders where files will not be listed
+LOOKUP_FOLDER_LIST = ['/Smartphone Sync']
 
 
 def init_dropbox(dropbox_token: str):
     return dropbox.Dropbox(dropbox_token)
 
 
-def load_all_files(dbx: dropbox.Dropbox):
-    response = dbx.files_list_folder("", recursive=True)
-    entries = response.entries
-    while response.has_more:
-        print(dt.now(), 'Listing files... Found so far:', len(entries))
-        response = dbx.files_list_folder_continue(response.cursor)
-        entries += response.entries
-    return entries
+def load_all_files(dbx: dropbox.Dropbox, lookup_folder: list = LOOKUP_FOLDER_LIST):
+    all_folder_entries = []
+    for folder in lookup_folder:
+        response = dbx.files_list_folder(folder, recursive=True)
+        entries = response.entries
+        while response.has_more:
+            print(dt.now(), 'Listing files... Found so far:', len(entries))
+            response = dbx.files_list_folder_continue(response.cursor)
+            entries += response.entries
+        all_folder_entries += entries
+    return all_folder_entries
 
 
 def filter_files_on_name_ending(files: list, name_endings: list):
