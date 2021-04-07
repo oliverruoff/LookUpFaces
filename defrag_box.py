@@ -100,6 +100,7 @@ if __name__ == '__main__':
         try:
             dbx.files_copy_v2(relocation_path.from_path,
                               relocation_path.to_path)
-        except dropbox.exceptions.ApiError:
+        except dropbox.exceptions.ApiError as e:
             print(dt.now(), 'Error while copying file. Continuing...')
+            print(e)
     print(dt.now(), 'Done!')
